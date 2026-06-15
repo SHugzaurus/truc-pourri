@@ -28,7 +28,7 @@
       <div class="slider-block">
         <label class="slider-title">Autorité</label>
         <div class="labels"><span>anarchiste</span><span>Autoritaire</span></div>
-        <input type="range" min="0" max="100" value="50" id="s3">
+        <input type="range" min="0" max="100" value="50" id="s3" step="50">
         <div class="value" id="v3">50</div>
       </div>
     </section>
@@ -88,7 +88,7 @@
       // authority affects color: left (anarchiste) -> red, right (autoritaire) -> very dark blue
       if(auth < 50){
         const t = (50 - auth) / 50; // 0..1 toward red
-        final = lerpColor(base, '#ff4d4f', t);
+        final = lerpColor(base, '#ff0000', t);
       } else if(auth > 50){
         const t = (auth - 50) / 50; // 0..1 toward very dark blue
         final = lerpColor(base, '#001427', t);
