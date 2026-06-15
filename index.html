@@ -8,7 +8,14 @@
 </head>
 <body>
   <main class="container">
-    <h1>Position politique</h1>
+    <div class="slider-block" style="margin-bottom: 24px;">
+        <h1>Position politique</h1>
+    </div>
+
+    <div class="party-suggestion">
+      <span>Proposition de parti :</span>
+      <strong id="partyLabel"></strong>
+    </div>
 
     <section class="sliders">
       <div class="slider-block">
@@ -62,7 +69,7 @@
       const e = parseInt(s2.value,10); // economie
       const avg = (o + e) / 2;
 
-      if(avg <= 25) return '#7b5cff';
+      if(avg <= 25) return '#Ab1cff';
       if(avg <= 50) return '#ff6fbf';
       if(avg <= 75) return '#ff9f3b';
       return '#2b6cb0';
@@ -74,7 +81,7 @@
       const avg = (o + e) / 2;
 
       if(avg <= 25){
-        if(o > 35 || e > 35) return lerpColor(base, '#ff6fbf', 0.25);
+        if( e > 40) return lerpColor(base, '#ff6fbf', 0.25);
         return base;
       }
 
@@ -103,6 +110,7 @@
       const base = computeBaseColor();
       const refined = refineColor(base);
       const auth = parseInt(s3.value,10);
+      const sum = parseInt(s1.value,10) + parseInt(s2.value,10);
       let final = refined;
 
       // special case: neutral center -> white
@@ -111,17 +119,55 @@
         return;
       }
 
-      // authority affects color: left (anarchiste) -> red, right (autoritaire) -> very dark blue
-      if(auth < 50){
-        const t = (50 - auth) / 50; // 0..1 toward red
-        final = lerpColor(refined, '#ff0000', t);
-      } else if(auth > 50){
-        const t = (auth - 50) / 50; // 0..1 toward very dark blue
-        final = lerpColor(refined, '#001427', t);
+      // discrete authority colors based on sum of the first two sliders
+      switch (auth) {
+        case 0:
+          final = sum >= 100 ? '#6b4423' : '#ff0000';
+          break;
+        case 100:
+          final = sum >= 100 ? '#001427' : '#7b0f3f';
+          break;
+        default:
+          break;
       }
 
       document.body.style.background = final;
+      document.getElementById('partyLabel').textContent = getPartyLabel(final);
     }
+
+    function getPartyLabel(color){
+      const parties = {
+        '#ab1cff': 'LFI',
+        '#ff6fbf': 'PS',
+        '#ff9f3b': 'Ensemble / MODEM',
+        '#2b6cb0': 'LR',
+        '#ffffff': '',
+        '#6b4423': 'UPR',
+        '#ff0000': 'LCR',
+        '#001427': 'RN',
+        '#7b0f3f': 'NPA'
+      };
+
+      function colorDistance(c1, c2) {
+        const [r1, g1, b1] = hexToRgb(c1);
+        const [r2, g2, b2] = hexToRgb(c2);
+        return Math.sqrt((r1-r2)**2 + (g1-g2)**2 + (b1-b2)**2);
+      }
+
+      let closestParty = '';
+      let minDist = Infinity;
+
+      for (const [hex, party] of Object.entries(parties)) {
+        const dist = colorDistance(color, hex);
+        if (dist < minDist) {
+          minDist = dist;
+          closestParty = party;
+        }
+      }
+
+      return closestParty;
+    }
+
 
     [s1,s2,s3].forEach(el => el.addEventListener('input', updateAll));
     updateAll();
