@@ -61,7 +61,7 @@
       const o = parseInt(s1.value,10); // orientation
       const e = parseInt(s2.value,10); // economie
 
-      if(o <= 50 && e <= 50) return '#7b5cff'; // progressiste + interventionniste => violet
+      if(o <= 50 && e < 50) return '#7b5cff'; // progressiste + interventionniste => violet
       if(o <= 50 && e >= 50 && e <= 70) return '#ff6fbf'; // progressiste + libéral (50-70) => rose
       if(o <= 50 && e >= 71) return '#ff9f3b'; // progressiste + libéral fort => orange
       if(o >= 50 && e >= 50) return '#2b6cb0'; // conservateur + libéral => bleu
@@ -78,6 +78,12 @@
       const base = computeBaseColor();
       const auth = parseInt(s3.value,10);
       let final = base;
+
+      // special case: neutral center -> white
+      if (parseInt(s1.value,10) === 50 && parseInt(s2.value,10) === 50 && auth === 50) {
+        document.body.style.background = '#ffffff';
+        return;
+      }
 
       // authority affects color: left (anarchiste) -> red, right (autoritaire) -> very dark blue
       if(auth < 50){
