@@ -60,14 +60,39 @@
     function computeBaseColor(){
       const o = parseInt(s1.value,10); // orientation
       const e = parseInt(s2.value,10); // economie
+      const avg = (o + e) / 2;
 
-      if(o <= 50 && e < 50) return '#7b5cff'; // progressiste + interventionniste => violet
-      if(o <= 50 && e >= 50 && e <= 70) return '#ff6fbf'; // progressiste + libéral (50-70) => rose
-      if(o <= 50 && e >= 71) return '#ff9f3b'; // progressiste + libéral fort => orange
-      if(o >= 50 && e >= 50) return '#2b6cb0'; // conservateur + libéral => bleu
+      if(avg <= 25) return '#7b5cff';
+      if(avg <= 50) return '#ff6fbf';
+      if(avg <= 75) return '#ff9f3b';
+      return '#2b6cb0';
+    }
 
-      // fallback: blend between purple and blue depending on orientation
-      return o < 50 ? '#9b59b6' : '#2b6cb0';
+    function refineColor(base){
+      const o = parseInt(s1.value,10);
+      const e = parseInt(s2.value,10);
+      const avg = (o + e) / 2;
+
+      if(avg <= 25){
+        if(o > 35 || e > 35) return lerpColor(base, '#ff6fbf', 0.25);
+        return base;
+      }
+
+      if(avg <= 50){
+        if(o < 40) return lerpColor(base, '#ff6fbf', 0.45);
+        if(o > 65) return lerpColor(base, '#ff9f3b', 0.35);
+        return base;
+      }
+
+      if(avg <= 75){
+        if(o < 45) return lerpColor(base, '#ff6fbf', 0.35);
+        if(e > 70 && o >= 40) return base;
+        if(e < 55) return lerpColor(base, '#2b6cb0', 0.25);
+        return base;
+      }
+
+      if(o < 60) return lerpColor(base, '#ff9f3b', 0.25);
+      return base;
     }
 
     function updateAll(){
@@ -76,8 +101,9 @@
       v3.textContent = s3.value;
 
       const base = computeBaseColor();
+      const refined = refineColor(base);
       const auth = parseInt(s3.value,10);
-      let final = base;
+      let final = refined;
 
       // special case: neutral center -> white
       if (parseInt(s1.value,10) === 50 && parseInt(s2.value,10) === 50 && auth === 50) {
@@ -88,10 +114,10 @@
       // authority affects color: left (anarchiste) -> red, right (autoritaire) -> very dark blue
       if(auth < 50){
         const t = (50 - auth) / 50; // 0..1 toward red
-        final = lerpColor(base, '#ff0000', t);
+        final = lerpColor(refined, '#ff0000', t);
       } else if(auth > 50){
         const t = (auth - 50) / 50; // 0..1 toward very dark blue
-        final = lerpColor(base, '#001427', t);
+        final = lerpColor(refined, '#001427', t);
       }
 
       document.body.style.background = final;
